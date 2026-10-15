@@ -21,10 +21,10 @@ class DurableKVStoreTests(unittest.TestCase):
         with DurableKVStore(self.data_dir, fsync=False) as store:
             store.set("a", 1)
             self.assertEqual(store.get("a"), 1)
-            self.assertTrue(store.delete("a"))
+            store.delete("a")
             with self.assertRaises(KeyError):
                 store.get("a")
-            self.assertFalse(store.delete("a"))
+            store.delete("a")
 
     def test_wal_recovery_without_snapshot(self) -> None:
         with DurableKVStore(self.data_dir, fsync=False) as store:

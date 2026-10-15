@@ -63,6 +63,8 @@ class DurableKVStore:
             self._data.pop(key, None)
 
     def _append_and_apply(self, op: str, key: str, value: Any = None) -> None:
+        if not isinstance(key, str):
+            raise TypeError("key must be a string")
         with self._lock:
             self._seq += 1
             record: dict[str, Any] = {"seq": self._seq, "op": op, "key": key}
@@ -84,26 +86,10 @@ class DurableKVStore:
             return self._data[key]
 
     def set(self, key: str, value: Any) -> None:
-        if not isinstance(key, str):
-            raise TypeError("key must be a string")
         self._append_and_apply(SET, key, value)
 
-    def delete(self, key: str) -> bool:
-        with self._lock:
-            existed = key in self._data
-            if not existed:
-                return False
-            self._seq += 1
-            record = {"seq": self._seq, "op": DEL, "key": key}
-            self._wal.append(record)
-            self._apply(record)
-            self._ops_since_snapshot += 1
-            if (
-                self._snapshot_every is not None
-                and self._ops_since_snapshot >= self._snapshot_every
-            ):
-                self._snapshot_locked()
-            return True
+    def delete(self, key: str) -> None:
+        self._append_and_apply(DEL, key)
 
     def snapshot(self) -> int:
         with self._lock:
