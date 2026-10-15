@@ -91,16 +91,10 @@ class DurableKVStore:
     def delete(self, key: str) -> None:
         self._append_and_apply(DEL, key)
 
-    def snapshot(self) -> int:
-        with self._lock:
-            return self._snapshot_locked()
-
-    def _snapshot_locked(self) -> int:
-        seq = self._seq
-        self._snapshot.save(dict(self._data), seq)
+    def _snapshot_locked(self) -> None:
+        self._snapshot.save(dict(self._data), self._seq)
         self._wal.rotate()
         self._ops_since_snapshot = 0
-        return seq
 
     def items(self) -> dict[str, Any]:
         with self._lock:

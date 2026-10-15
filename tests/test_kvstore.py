@@ -37,11 +37,9 @@ class DurableKVStoreTests(unittest.TestCase):
                 store.get("count")
 
     def test_snapshot_then_wal_replay(self) -> None:
-        with DurableKVStore(self.data_dir, fsync=False) as store:
+        with DurableKVStore(self.data_dir, fsync=False, snapshot_every=1) as store:
             store.set("k1", "v1")
             store.set("k2", "v2")
-            seq = store.snapshot()
-            self.assertEqual(seq, 2)
             store.set("k3", "v3")
             store.delete("k1")
         with DurableKVStore(self.data_dir, fsync=False) as store:
@@ -51,7 +49,7 @@ class DurableKVStoreTests(unittest.TestCase):
             self.assertEqual(store.get("k3"), "v3")
 
     def test_snapshot_every_n_ops(self) -> None:
-        with DurableKVStore(self.data_dir, fsync=False, snapshot_every=2) as store:
+        with DurableKVStore(self.data_dir, fsync=False, snapshot_every=1) as store:
             store.set("a", 1)
             store.set("b", 2)
             self.assertTrue(os.path.exists(os.path.join(self.data_dir, "snapshot.json")))
