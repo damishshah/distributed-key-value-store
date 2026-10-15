@@ -80,10 +80,7 @@ class DurableKVStore:
                 self._snapshot_locked()
 
     def get(self, key: str) -> Any:
-        with self._lock:
-            if key not in self._data:
-                raise KeyError(key)
-            return self._data[key]
+        return self._data[key]
 
     def set(self, key: str, value: Any) -> None:
         self._append_and_apply(SET, key, value)
