@@ -79,6 +79,11 @@ class DurableKVStore:
             ):
                 self._snapshot_locked()
 
+    def _snapshot_locked(self) -> None:
+        self._snapshot.save(dict(self._data), self._seq)
+        self._wal.rotate()
+        self._ops_since_snapshot = 0
+
     def get(self, key: str) -> Any:
         return self._data[key]
 
@@ -87,11 +92,6 @@ class DurableKVStore:
 
     def delete(self, key: str) -> None:
         self._append_and_apply(DEL, key)
-
-    def _snapshot_locked(self) -> None:
-        self._snapshot.save(dict(self._data), self._seq)
-        self._wal.rotate()
-        self._ops_since_snapshot = 0
 
     def items(self) -> dict[str, Any]:
         with self._lock:
