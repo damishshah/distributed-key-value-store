@@ -92,7 +92,7 @@ class DurableKVStoreTests(unittest.TestCase):
         with open(path, "rb") as handle:
             length, crc = struct.unpack(HEADER_FORMAT, handle.read(8))
             payload = handle.read(length)
-        self.assertEqual(zlib.crc32(payload) & 0xFFFFFFFF, crc)
+        self.assertEqual(zlib.crc32(payload), crc)
 
 
 if __name__ == "__main__":

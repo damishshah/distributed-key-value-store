@@ -41,7 +41,7 @@ class WriteAheadLog:
         payload = json.dumps(record, separators=(",", ":"), ensure_ascii=False).encode(
             "utf-8"
         )
-        crc = zlib.crc32(payload) & 0xFFFFFFFF
+        crc = zlib.crc32(payload)
         self._file.write(struct.pack(HEADER_FORMAT, len(payload), crc))
         self._file.write(payload)
         self._file.flush()
@@ -61,7 +61,7 @@ class WriteAheadLog:
                 payload = handle.read(length)
                 if len(payload) < length:
                     return
-                actual_crc = zlib.crc32(payload) & 0xFFFFFFFF
+                actual_crc = zlib.crc32(payload)
                 if actual_crc != expected_crc:
                     return
                 try:
